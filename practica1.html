@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<!-- Inicio Head -->
+
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&display=swap" rel="stylesheet">
+  <!-- Meta Información -->
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="21753- Gestión y Distribución de la Informática empresarial">
+  <meta name="author" content="Alejandro Martin">
+
+  <!-- Título e Icono de la Pestaña de Navegación -->
+  <title>Visor avanzado</title>
+
+  <!-- Enlaces -->
+  <link rel="stylesheet" href="./index_files/bootstrap.css" media="screen">
+  <link rel="stylesheet" href="./index_files/custom.min.css">
+
+  <style>
+    body {
+      background: radial-gradient(circle at center, #3b3a2e 0%, #1c1b16 100%);
+      background-attachment: fixed;
+      color: #e8d9a8;
+      font-family: "Garamond", serif;
+    }
+
+    /* textura tipo pergamino */
+    .container {
+      background: rgba(20, 20, 15, 0.85);
+      border: 3px solid #8c6b2f;
+      border-radius: 10px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    h2 {
+      color: #e6c36a;
+      text-shadow: 0 0 10px #000;
+    }
+
+    .lead {
+      color: #d8c48a;
+    }
+
+    /* ===================== */
+    /* ESTILO SEÑOR DE LOS ANILLOS */
+    /* ===================== */
+
+    body {
+      background: radial-gradient(circle at center, #3b3a2e 0%, #1c1b16 100%);
+      background-attachment: fixed;
+      color: #e8d9a8;
+      font-family: "Garamond", serif;
+    }
+
+    .container {
+      background: rgba(20, 20, 15, 0.85);
+      border: 3px solid #8c6b2f;
+      border-radius: 10px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    h2 {
+      color: #e6c36a;
+      text-shadow: 0 0 10px #000;
+    }
+
+    .lead {
+      color: #d8c48a;
+    }
+
+    video {
+      border: 6px solid #b89b4a;
+      border-radius: 8px;
+      box-shadow:
+        0 0 20px rgba(0, 0, 0, 0.8),
+        inset 0 0 15px rgba(0, 0, 0, 0.6);
+    }
+
+    #mapaContainer {
+      border: 5px solid #8c6b2f;
+      padding: 10px;
+      border-radius: 8px;
+      background: #2c2a21;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+    }
+
+    .list-group-item {
+      background: #2f2d24;
+      color: #e6d7a5;
+      border: 1px solid #6e5a2c;
+    }
+
+    .list-group-item:hover {
+      background: #4a4533;
+      color: #ffd86b;
+      cursor: pointer;
+    }
+
+    #contenido {
+      border: 2px solid #b89b4a;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    h2 {
+      font-family: 'Uncial Antiqua', cursive;
+    }
+
+    h2,
+    .lead {
+      text-align: center;
+    }
+
+    .row {
+      margin-top: 15px;
+    }
+
+    #contenido {
+      text-align: center;
+    }
+
+    #bloque {
+      margin-top: 10px;
+      position: relative;
+    }
+
+    #camino {
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 6px gold);
+      transition: stroke-dashoffset 0.5s linear;
+    }
+
+    #settingsBtn {
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    #settingsMenu {
+      position: absolute;
+      bottom: 40px;
+      right: 10px;
+      background: #2f2d24;
+      border: 2px solid #8c6b2f;
+      border-radius: 8px;
+      padding: 10px;
+      display: none;
+      color: #e6d7a5;
+      box-shadow: 0 0 10px black;
+      z-index: 999;
+    }
+
+    .menu-section {
+      margin-bottom: 10px;
+    }
+
+    .menu-section button {
+      display: block;
+      width: 100%;
+      background: #4a4533;
+      color: #ffd86b;
+      border: none;
+      margin-top: 5px;
+      padding: 5px;
+      cursor: pointer;
+    }
+
+    .menu-section button:hover {
+      background: #6e5a2c;
+    }
+
+    #marker {
+      transition: left 0.5s, top 0.5s;
+    }
+
+    .list-group-item.active {
+      background: gold !important;
+      color: white !important;
+    }
+
+    #detallePreguntas::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #detallePreguntas::-webkit-scrollbar-thumb {
+      background: gold;
+      border-radius: 4px;
+    }
+    #imgZona {
+    transition: opacity 0.5s ease-in-out;
+}
+  </style>
+</head>
+
+
+<body oncontextmenu="return false">
+  <div class="container">
+    <div class="row">
+
+      <div class="col-lg-12 text-center">
+        <h2>Viaje de Bilbo y Compañia a Erebor</h2>
+        <p class="lead" align="middle">Sistema interactivo de navegación geográfica</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-3">
+        <div class="list-group table-of-contents" height="800">
+          <!-- <a class="list-group-item" style="background:gold">
+            <font color="white">Zonas</font>
+          </a> -->
+          <a class="list-group-item" onclick="setTime(0,'comarca');">La Comarca</a>
+          <a class="list-group-item" onclick="setTime(100,'rivendell');">Rivendel</a>
+          <a class="list-group-item" onclick="setTime(148,'montanas');">Montañas Nubladas</a>
+          <a class="list-group-item" onclick="setTime(188,'bosque');">Bosque Negro</a>
+          <a class="list-group-item" onclick="setTime(244,'lago');">Ciudad del lago</a>
+          <a class="list-group-item" onclick="setTime(267,'erebor');">Erebor</a>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div id="contenido">
+
+          <video id="video" width="555" autoplay preload="auto">
+            <source src="video/video.mp4" type="video/mp4">
+            <source src="video/video.ogg" type="video/ogg">
+
+            Este navegador no es capaz de soportar HTML5 video.
+
+            <track id="subs" kind="subtitles" src="video/subtitulos.vtt" srclang="es" label="Español" default>
+            <track id="track" kind="metadata" src="video/descripcion.vtt">
+          </video>
+          <div id="bloque">
+            <span id="play" class="glyphicon glyphicon-pause" onclick="play();"></span>
+            <span id="stop" class="glyphicon glyphicon-stop" onclick="stop();"></span>
+            <span id="backward" class="glyphicon glyphicon-backward" onclick="backward(10);"></span>
+            <span id="forward" class="glyphicon glyphicon-forward" onclick="forward(10);"></span>
+
+            <!-- <span id="subsBtn" class="glyphicon glyphicon-text-size" onclick="toggleSubs();"></span>
+
+            <select id="quality" onchange="changeQuality(this.value)">
+              <option value="video/high/v-00.mp4">4K (high)</option>
+              <option value="video/medium/v-00.mp4">1080p (medium)</option>
+              <option value="video/low/v-00.mp4">720p (low)</option>
+            </select> -->
+
+            <span id="currentTime"></span>
+            <canvas id="canvas" width="385" height="15"></canvas>
+            <span id="tiempoTotal">04:58</span>
+            <span class="glyphicon glyphicon-move" onclick="fullScreen();"></span>
+
+            <span id="settingsBtn" class="glyphicon glyphicon-cog" onclick="toggleSettings();"></span>
+
+            <div id="settingsMenu">
+              <div class="menu-section">
+                <b>Subtítulos</b>
+                <button onclick="accionSettings(toggleSubs)">Activar / Desactivar</button>
+              </div>
+
+              <div class="menu-section">
+                <b>Resolución</b>
+                <button onclick="accionSettings(()=>changeQuality('high'))">2160p(4K)</button>
+                <button onclick="accionSettings(()=>changeQuality('medium'))">1080p(HD)</button>
+                <button onclick="accionSettings(()=>changeQuality('low'))">720p</button>
+              </div>
+
+              <div class="menu-section">
+                <b>Velocidad</b>
+                <button onclick="accionSettings(()=>changeSpeed(0.5))">0.5x</button>
+                <button onclick="accionSettings(()=>changeSpeed(1))">1x</button>
+                <button onclick="accionSettings(()=>changeSpeed(1.5))">1.5x</button>
+                <button onclick="accionSettings(()=>changeSpeed(2))">2x</button>
+              </div>
+            </div>
+          </div>
+          <div id="mapaContainer" style="position:relative; margin-top:20px; text-align:center;">
+
+            <img id="mapa" src="img/mapa_tierra_media.jpg" width="500">
+
+            <!-- Ruta del viaje -->
+            <svg id="ruta" width="500" height="300" style="position:absolute; left:0; top:0; pointer-events:none;">
+
+              <polyline id="camino" points="220,180 330,170 340,160 395,150 415,150 415,135" style="
+              fill:none;
+              stroke:#ffd700;
+              stroke-width:4;
+              stroke-dasharray:5 5 15 10;" />
+
+            </svg>
+
+            <!-- marcador -->
+            <div id="marker" style="
+             position:absolute;
+              width:18px;
+              height:18px;
+              background:black;
+              border-radius:50%;
+              transform:translate(-50%,-50%);
+              border:2px solid white;">
+            </div>
+
+          </div>
+          <div id="quizContainer" style="
+            display:none;
+            position:absolute;
+            top:50%;
+            left:50%;
+            transform:translate(-50%,-50%);
+            background:#2f2d24;
+            border:3px solid gold;
+            padding:20px;
+            border-radius:10px;
+            z-index:1000;
+            width:400px;
+            text-align:center;
+            ">
+
+            <h3 id="quizPregunta"></h3>
+
+            <div id="quizOpciones"></div>
+
+            <p id="quizMensaje" style="margin-top:10px;"></p>
+
+          </div>
+          <div id="resumenFinal" style="
+            display:none;
+            position:fixed;
+            top:50%;
+            left:50%;
+            transform:translate(-50%,-50%);
+            background:#2f2d24;
+            border:4px solid gold;
+            border-radius:12px;
+            z-index:2000;
+            width:420px;
+            max-height:75vh;
+            box-shadow:0 0 30px black;
+            color:white;
+            font-weight:bold;
+            ">
+
+            <div style="padding:20px">
+
+              <h2 style="margin-top:0">Viaje completado</h2>
+
+              <p id="resultadoViaje"></p>
+
+            </div>
+
+            <div id="detallePreguntas" style="
+            max-height:40vh;
+            overflow-y:auto;
+            padding:0 20px 10px 20px;
+            ">
+
+            </div>
+
+            <div style="padding:15px; text-align:center">
+
+              <button onclick="reiniciarViaje()" style="
+                background:transparent;
+                border:2px solid gold;
+                color:white;
+                font-weight:bold;
+                padding:8px 18px;
+                cursor:pointer;
+                ">
+                Volver a empezar
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/funciones.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script>
+    const isVideo = document.getElementById('video');
+    const videoSrc = 'video/hls/master.m3u8';
+
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(videoSrc);
+      hls.attachMedia(isVideo);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        isVideo.play();
+      });
+    } else if (isVideo.canPlayType('application/vnd.apple.mpegurl')) {
+      isVideo.src = videoSrc;
+      isVideo.addEventListener('loadedmetadata', () => isVideo.play());
+    } else {
+      isVideo.src = 'video/video.ogg'; // fallback OGG
+    }
+  </script>
+  <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+  <script>
+    const isVideo2 = document.getElementById('video');
+    const player = dashjs.MediaPlayer().create();
+    player.initialize(isVideo2, 'video/mpd/high.mpd', true);
+  </script>
+</body>
+
+</html>
