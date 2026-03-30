@@ -1,24 +1,108 @@
 <!DOCTYPE html>
 <html lang="es">
 
-<!-- Inicio Head -->
 <head>
-
-  <!-- Meta Información -->
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <!-- Título e Icono de la Pestaña de Navegación -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GDIE</title>
 
+  <link rel="stylesheet" href="./index_files/bootstrap.css">
+  <link rel="stylesheet" href="./index_files/custom.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      background: url('img/wallpaper.jpg') no-repeat center center fixed;
+      background-size: cover;
+      font-family: "Garamond", serif;
+    }
+
+    .overlay {
+      /* background: rgba(0, 0, 0, 0.6); */
+      min-height: 100vh;
+    }
+
+    .container-box {
+      background: rgba(20, 20, 15, 0.85);
+      border: 3px solid #8c6b2f;
+      border-radius: 12px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
+      padding: 30px;
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    h3 {
+      font-family: 'Uncial Antiqua', cursive;
+      color: #e6c36a;
+      text-shadow: 0 0 10px black;
+    }
+
+    .lead {
+      color: #d8c48a;
+    }
+
+    /* Botón estilo LOTR */
+    .lotr-btn {
+      display: block;
+      width: 100%;
+      margin-top: 15px;
+      padding: 15px;
+      background: #2f2d24;
+      border: 2px solid #8c6b2f;
+      border-radius: 8px;
+      color: #e6d7a5;
+      font-size: 18px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+    }
+
+    .lotr-btn:hover {
+      background: #4a4533;
+      color: #ffd86b;
+      border-color: gold;
+      box-shadow: 0 0 15px gold;
+      transform: scale(1.03);
+    }
+
+    .buttons-container {
+      margin-top: 30px;
+    }
+  </style>
 </head>
 
-<body>
+<body oncontextmenu="return false">
 
-  <button onclick="location.href='practica1.html'">
-    Ir a práctica 1*
-  </button>
+  <div class="overlay">
+
+    <div class="container">
+      <div class="container-box">
+        <h3>Viaje de Bilbo y Compañia a Erebor</h3>
+        <p class="lead">Alejandro Martín Vázquez</p>
+
+        <div class="buttons-container">
+          <a href="./practica1.html" target="_blank" class="lotr-btn">
+            Práctica 1
+          </a>
+          <a target="_blank" class="lotr-btn">
+            Práctica 2
+          </a>
+          <a target="_blank" class="lotr-btn">
+            Práctica 3
+          </a>
+
+          <!-- Puedes añadir más prácticas aquí -->
+          <!--
+          <a href="#" class="lotr-btn">Práctica 2</a>
+          -->
+        </div>
+
+      </div>
+    </div>
+
+  </div>
 
 </body>
 
