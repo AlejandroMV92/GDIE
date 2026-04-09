@@ -1,6 +1,14 @@
 const quizResuelto = {}
 const respuestasUsuario = {}
 
+let hlsInstance = null;
+let dashInstance = null;
+
+let segmentoActual = 0;
+let totalSegmentos = 30; // ajusta a tus archivos reales
+let calidadActual = "high";
+let currentPlayer = "hls";
+
 function iniciarEventos() {
     var canvas = document.getElementById('canvas');
     var video = document.getElementById('video');
@@ -180,7 +188,6 @@ function moverMarcador(detections) {
 
 }
 function moverZona(zona) {
-
     const marker = document.getElementById("marker")
 
     const posiciones = {
@@ -191,20 +198,26 @@ function moverZona(zona) {
         lago: { x: 415, y: 150 },
         erebor: { x: 415, y: 135 }
     }
-    console.log("posiciones", posiciones)
     marker.style.left = posiciones[zona].x + "px"
     marker.style.top = posiciones[zona].y + "px"
 
 }
 window.onload = () => {
+
     moverZona("comarca")
     iniciarRuta()
     actualizarRuta("comarca")
+    marcarZonaActiva("comarca")
 
     const icono_play = document.getElementById("play");
     const video = document.getElementById("video");
     // ajusta el icono según si está reproduciéndose
     icono_play.setAttribute("class", video.paused ? "glyphicon glyphicon-play" : "glyphicon glyphicon-pause");
+
+    marcarSeleccion("player", "hls");
+    marcarSeleccion("quality", "high");
+
+    loadHLS();
 }
 
 function iniciarRuta() {
@@ -224,7 +237,6 @@ const progresoZona = {
 }
 
 function actualizarRuta(zona) {
-
     const ruta = document.getElementById("camino")
     const total = ruta.getTotalLength()
 
@@ -235,22 +247,114 @@ function actualizarRuta(zona) {
 }
 
 function toggleSubs() {
-
     const video = document.getElementById("video");
-    const track = video.textTracks[0];
 
-    if (track.mode === "showing") {
-        track.mode = "hidden";
-    } else {
-        track.mode = "showing";
+    for (let i = 0; i < video.textTracks.length; i++) {
+        const track = video.textTracks[i];
+        if (track.kind === "subtitles") {
+            track.mode = track.mode === "showing" ? "disabled" : "showing";
+        }
     }
 }
 
 function changeQuality(level) {
-    const hls = window.hlsInstance; // guarda tu instancia Hls al crearla
-    if (level === 'high') hls.currentLevel = 0;    // primer nivel
-    if (level === 'medium') hls.currentLevel = 1;  // segundo nivel
-    if (level === 'low') hls.currentLevel = 2;     // tercer nivel
+
+    const video = document.getElementById("video");
+
+    calidadActual = level;
+    marcarSeleccion("quality", level);
+
+    // ===== HLS =====
+    if (currentPlayer === "hls" && hlsInstance) {
+
+        const levels = hlsInstance.levels;
+
+        if (level === "low") hlsInstance.currentLevel = 0;
+        if (level === "medium") hlsInstance.currentLevel = Math.floor(levels.length / 2);
+        if (level === "high") hlsInstance.currentLevel = levels.length - 1;
+
+        return;
+    }
+
+    // ===== DASH =====
+    if (currentPlayer === "dash" && dashInstance) {
+
+        const bitrates = dashInstance.getBitrateInfoListFor("video");
+
+        if (level === "low") dashInstance.setQualityFor("video", 0);
+        if (level === "medium") dashInstance.setQualityFor("video", Math.floor(bitrates.length / 2));
+        if (level === "high") dashInstance.setQualityFor("video", bitrates.length - 1);
+
+        dashInstance.updateSettings({
+            streaming: {
+                abr: {
+                    autoSwitchBitrate: { video: false }
+                }
+            }
+        });
+
+        return;
+    }
+
+    // ===== MP4 (carpetas) =====
+    if (currentPlayer === "mp4") {
+        let duracionSegmento = 4; // segundos reales de cada fragmento
+        // guardar progreso global
+        const tiempoGlobal = segmentoActual * duracionSegmento + video.currentTime;
+
+        calidadActual = level;
+
+        // calcular nuevo segmento
+        segmentoActual = Math.floor(tiempoGlobal / duracionSegmento);
+
+        cargarSegmento(segmentoActual);
+
+        video.addEventListener("loadedmetadata", () => {
+            video.currentTime = tiempoGlobal % duracionSegmento;
+        }, { once: true });
+
+        return;
+    }
+
+
+}
+
+function loadMP4() {
+    limpiarPlayer();
+
+    segmentoActual = 0;
+    currentPlayer = "mp4";
+
+    cargarSegmento(segmentoActual);
+
+    const video = document.getElementById("video");
+
+    video.onended = () => {
+        segmentoActual++;
+
+        if (segmentoActual < totalSegmentos) {
+            cargarSegmento(segmentoActual);
+        }
+    };
+}
+
+function cargarSegmento(index) {
+    const video = document.getElementById("video");
+    const num = index.toString().padStart(2, "0");
+    video.src = `video/media-abr/${calidadActual}/v-${num}.mp4`;
+
+    video.load();
+
+    addSubtitles(); // 🔥 reañadimos el track después de load()
+
+    video.play();
+
+    video.onended = () => {
+        segmentoActual++;
+        if (segmentoActual < totalSegmentos) {
+            cargarSegmento(segmentoActual);
+        }
+    };
 }
 
 function toggleSettings() {
@@ -282,10 +386,10 @@ document.addEventListener("click", function (e) {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  const video = document.getElementById("video");
-  if (video.textTracks.length > 0) {
-    video.textTracks[0].mode = "showing";
-  }
+    const video = document.getElementById("video");
+    if (video.textTracks.length > 0) {
+        video.textTracks[0].mode = "showing";
+    }
 });
 
 const zonasVideo = [
@@ -307,14 +411,12 @@ video.addEventListener("timeupdate", () => {
     const tiempo = video.currentTime
 
     const zonaActual = zonasVideo.find(z => tiempo >= z.inicio && tiempo < z.fin)
-
     if (zonaActual && zonaActual.zona !== zonaAnterior) {
 
         zonaAnterior = zonaActual.zona
 
         moverZona(zonaActual.zona)
         actualizarRuta(zonaActual.zona)
-        actualizarDetalleZona(zonaActual.zona);
         marcarZonaActiva(zonaActual.zona)
 
     }
@@ -333,12 +435,13 @@ video.addEventListener("timeupdate", () => {
 
 })
 
-function marcarZonaActiva(zona) {
+function marcarZonaActiva(zonaActual) {
     const items = document.querySelectorAll('.table-of-contents .list-group-item');
+
     items.forEach(item => {
-        // El atributo onclick contiene el nombre de la zona
-        const onClickAttr = item.getAttribute('onclick') || '';
-        if (onClickAttr.includes(`'${zona}'`)) {
+        // Usamos dataset en vez de onclick para evitar comparaciones frágiles
+        const zona = item.dataset.zona;
+        if (zona === zonaActual) {
             item.classList.add('active');
         } else {
             item.classList.remove('active');
@@ -393,6 +496,7 @@ function mostrarQuiz(zona) {
     const pregunta = document.getElementById("quizPregunta");
     const opciones = document.getElementById("quizOpciones");
     const mensaje = document.getElementById("quizMensaje");
+    const ultimaZona = zonasVideo[zonasVideo.length - 1].zona;
 
     pregunta.innerText = quiz.pregunta;
     opciones.innerHTML = "";
@@ -430,7 +534,12 @@ function mostrarQuiz(zona) {
             };
             quizResuelto[zona] = true;
             container.style.display = "none";
-            video.play();
+            // Si es la última zona, mostrar resumen
+            if (zona === ultimaZona) {
+                mostrarResumen();
+            } else {
+                video.play();
+            }
         };
 
         opciones.appendChild(btn);
@@ -438,8 +547,6 @@ function mostrarQuiz(zona) {
 
     container.style.display = "block";
 }
-
-video.addEventListener("ended", mostrarResumen)
 
 function mostrarResumen() {
 
@@ -497,15 +604,18 @@ function reiniciarViaje() {
 }
 
 function cerrarSettings() {
-    document.getElementById("settingsMenu").style.display = "none"
+    const loader = document.getElementById("settingsMenu");
+    if (loader) loader.style.display = "none";
 }
 
 function mostrarLoader() {
-    document.getElementById("videoLoader").style.display = "block"
+    const loader = document.getElementById("videoLoader");
+    if (loader) loader.style.display = "block";
 }
 
 function ocultarLoader() {
-    document.getElementById("videoLoader").style.display = "none"
+    const loader = document.getElementById("videoLoader");
+    if (loader) loader.style.display = "none";
 }
 
 function accionSettings(callback) {
@@ -525,26 +635,122 @@ function accionSettings(callback) {
     }
 }
 
-function actualizarDetalleZona(zona) {
-    const infoZonas = {
-        comarca: { nombre: "La Comarca", descripcion: "Hogar de Bilbo y los hobbits, tranquilo y verde.", img: "img/comarca.jpg" },
-        rivendell: { nombre: "Rivendel", descripcion: "Valle élfico gobernado por Elrond, lugar de descanso y consejo.", img: "img/rivendell.jpg" },
-        montanas: { nombre: "Montañas Nubladas", descripcion: "Terreno peligroso, hogar de trolls y orcos.", img: "img/montanas.jpg" },
-        bosque: { nombre: "Bosque Negro", descripcion: "Bosque oscuro y tenebroso, con elfos hostiles.", img: "img/bosque.jpg" },
-        lago: { nombre: "Ciudad del Lago", descripcion: "Ciudad a orillas del lago, gobernada por Bard.", img: "img/lago.jpg" },
-        erebor: { nombre: "Erebor", descripcion: "Montaña solitaria, hogar del tesoro custodiado por Smaug.", img: "img/erebor.jpg" }
-    };
-
-    if(infoZonas[zona]) {
-        document.getElementById("nombreZona").innerText = infoZonas[zona].nombre;
-        document.getElementById("descripcionZona").innerText = infoZonas[zona].descripcion;
-        document.getElementById("imgZona").src = infoZonas[zona].img;
-    }
-}
-
 const img = document.getElementById("imgZona");
 img.style.opacity = 0;
 setTimeout(() => {
     img.src = infoZonas[zona].img;
     img.style.opacity = 1;
 }, 200);
+
+function loadHLS() {
+    const video = document.getElementById("video");
+
+    limpiarPlayer();
+
+    if (Hls.isSupported()) {
+        hlsInstance = new Hls();
+        hlsInstance.loadSource("video/hls/master.m3u8");
+        hlsInstance.attachMedia(video);
+
+        hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+            hlsInstance.autoLevelEnabled = false;
+            addSubtitles();
+            video.play();
+        });
+
+        currentPlayer = "hls";
+    } else {
+        console.warn("HLS no soportado");
+    }
+}
+
+function loadDASH() {
+    const video = document.getElementById("video");
+
+    limpiarPlayer();
+
+    dashInstance = dashjs.MediaPlayer().create();
+    dashInstance.initialize(video, "video/mpd/high.mpd", true);
+
+    addSubtitles();
+    currentPlayer = "dash";
+}
+
+function addSubtitles() {
+    const video = document.getElementById("video");
+
+    // ----- 1️⃣ Limpiar tracks existentes -----
+    const existingTracks = video.querySelectorAll('track[kind="subtitles"]');
+    existingTracks.forEach(t => t.remove());
+
+    // ----- 2️⃣ Track externo (VTT) -----
+    const track = document.createElement("track");
+    track.kind = "subtitles";
+    track.label = "Español";
+    track.srclang = "es";
+    track.src = "video/subtitulos.vtt"; // tu ruta real
+    track.default = true;
+    video.appendChild(track);
+
+    // ----- 3️⃣ Activar track automáticamente -----
+    video.addEventListener("loadedmetadata", () => {
+        for (let i = 0; i < video.textTracks.length; i++) {
+            const t = video.textTracks[i];
+            if (t.kind === "subtitles") {
+                t.mode = "showing"; // mostrar subtítulos
+            }
+        }
+    }, { once: true });
+
+    // ----- 4️⃣ HLS específico -----
+    if (currentPlayer === "hls" && hlsInstance) {
+        // si quieres habilitar cualquier pista interna de HLS:
+        if (hlsInstance.subtitleTracks && hlsInstance.subtitleTracks.length > 0) {
+            hlsInstance.subtitleTrack = 0; // primera pista
+        }
+    }
+
+    // ----- 5️⃣ DASH específico -----
+    if (currentPlayer === "dash" && dashInstance) {
+        dashInstance.setTextDefaultLanguage("es");
+        dashInstance.setTextDefaultEnabled(true);
+    }
+}
+
+function limpiarPlayer() {
+    const video = document.getElementById("video");
+
+    video.pause();
+
+    if (hlsInstance) {
+        hlsInstance.destroy();
+        hlsInstance = null;
+    }
+
+    if (dashInstance) {
+        dashInstance.reset();
+        dashInstance = null;
+    }
+
+    video.removeAttribute("src");
+    video.load();
+}
+
+function marcarSeleccion(grupo, valor) {
+    const botones = document.querySelectorAll(`[data-group="${grupo}"]`);
+
+    botones.forEach(btn => {
+        if (btn.dataset.value === valor) {
+            btn.classList.add("active");
+        } else {
+            btn.classList.remove("active");
+        }
+    });
+}
+
+function selectPlayer(player) {
+    if (player === "hls") loadHLS();
+    if (player === "dash") loadDASH();
+
+    marcarSeleccion("player", player);
+}

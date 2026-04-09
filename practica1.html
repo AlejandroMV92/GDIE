@@ -194,14 +194,21 @@
       background: gold;
       border-radius: 4px;
     }
+
     #imgZona {
-    transition: opacity 0.5s ease-in-out;
-}
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .menu-section button.active {
+      background: gold !important;
+      color: black !important;
+      font-weight: bold;
+    }
   </style>
 </head>
 
 
-<body oncontextmenu="return false">
+<body oncontextmenu="return true">
   <div class="container">
     <div class="row">
 
@@ -215,24 +222,21 @@
   <div class="container">
     <div class="row">
       <div class="col-lg-3">
-        <div class="list-group table-of-contents" height="800">
-          <!-- <a class="list-group-item" style="background:gold">
-            <font color="white">Zonas</font>
-          </a> -->
-          <a class="list-group-item" onclick="setTime(0,'comarca');">La Comarca</a>
-          <a class="list-group-item" onclick="setTime(100,'rivendell');">Rivendel</a>
-          <a class="list-group-item" onclick="setTime(148,'montanas');">Montañas Nubladas</a>
-          <a class="list-group-item" onclick="setTime(188,'bosque');">Bosque Negro</a>
-          <a class="list-group-item" onclick="setTime(244,'lago');">Ciudad del lago</a>
-          <a class="list-group-item" onclick="setTime(267,'erebor');">Erebor</a>
-        </div>
+        <ul class="table-of-contents list-group">
+          <li class="list-group-item" data-zona="comarca" onclick="setTime(0,'comarca')">Comarca</li>
+          <li class="list-group-item" data-zona="rivendell" onclick="setTime(100,'rivendell')">Rivendel</li>
+          <li class="list-group-item" data-zona="montanas" onclick="setTime(148,'montanas')">Montañas</li>
+          <li class="list-group-item" data-zona="bosque" onclick="setTime(188,'bosque')">Bosque</li>
+          <li class="list-group-item" data-zona="lago" onclick="setTime(244,'lago')">Lago</li>
+          <li class="list-group-item" data-zona="erebor" onclick="setTime(267,'erebor')">Erebor</li>
+        </ul>
       </div>
       <div class="col-lg-8">
         <div id="contenido">
 
           <video id="video" width="555" autoplay preload="auto">
-            <source src="video/video.mp4" type="video/mp4">
-            <source src="video/video.ogg" type="video/ogg">
+            <!-- <source src="video/video.mp4" type="video/mp4">
+            <source src="video/video.ogg" type="video/ogg"> -->
 
             Este navegador no es capaz de soportar HTML5 video.
 
@@ -264,13 +268,22 @@
               <div class="menu-section">
                 <b>Subtítulos</b>
                 <button onclick="accionSettings(toggleSubs)">Activar / Desactivar</button>
+                <!-- <button onclick="accionSettings(loadHLS)">HLS</button> -->
+                <button data-group="player" data-value="hls"
+                  onclick="accionSettings(()=>selectPlayer('hls'))">HLS</button>
+                <button data-group="player" data-value="dash"
+                  onclick="accionSettings(()=>selectPlayer('dash'))">DASH</button>
               </div>
 
               <div class="menu-section">
                 <b>Resolución</b>
-                <button onclick="accionSettings(()=>changeQuality('high'))">2160p(4K)</button>
-                <button onclick="accionSettings(()=>changeQuality('medium'))">1080p(HD)</button>
-                <button onclick="accionSettings(()=>changeQuality('low'))">720p</button>
+                <button data-group="quality" data-value="high"
+                  onclick="accionSettings(()=>changeQuality('high'))">2160p(4K)</button>
+                <button data-group="quality" data-value="medium"
+                  onclick="accionSettings(()=>changeQuality('medium'))">1080p(HD)</button>
+                <button data-group="quality" data-value="low"
+                  onclick="accionSettings(()=>changeQuality('low'))">720p</button>
+
               </div>
 
               <div class="menu-section">
@@ -388,30 +401,7 @@
   <!-- Scripts -->
   <script src="js/funciones.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <script>
-    const isVideo = document.getElementById('video');
-    const videoSrc = 'video/hls/master.m3u8';
-
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(videoSrc);
-      hls.attachMedia(isVideo);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        isVideo.play();
-      });
-    } else if (isVideo.canPlayType('application/vnd.apple.mpegurl')) {
-      isVideo.src = videoSrc;
-      isVideo.addEventListener('loadedmetadata', () => isVideo.play());
-    } else {
-      isVideo.src = 'video/video.ogg'; // fallback OGG
-    }
-  </script>
   <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
-  <script>
-    const isVideo2 = document.getElementById('video');
-    const player = dashjs.MediaPlayer().create();
-    player.initialize(isVideo2, 'video/mpd/high.mpd', true);
-  </script>
 </body>
 
 </html>
