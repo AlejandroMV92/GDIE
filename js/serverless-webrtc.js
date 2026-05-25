@@ -142,6 +142,26 @@ function setupDC1 () {
         var data = JSON.parse(e.data)
         if (data.type === 'file') {
           fileReceiver1.receive(e.data, {})
+        } else if (data.type === 'play') {
+          document.getElementById('video').play();
+          agregarMensaje('El controlador ha iniciado la reproducción');
+        } else if (data.type === 'pause') {
+          document.getElementById('video').pause();
+          agregarMensaje('El controlador ha pausado la reproducción');
+        } else if (data.type === 'seek') {
+          const video = document.getElementById('video');
+          video.currentTime = data.time;
+          if (data.zona) {
+            moverZona(data.zona);
+            actualizarRuta(data.zona);
+            marcarZonaActiva(data.zona);
+            agregarMensaje('El controlador ha saltado a la zona ' + data.zona);
+          }
+        } else if (data.type === 'quiz') {
+          mostrarQuiz(data.zona);
+          agregarMensaje('Quiz activado para la zona ' + data.zona);
+        } else if (data.type === 'respuestaQuiz') {
+          agregarMensaje('El quiz de ' + data.zona + ' ha sido contestado: ' + (data.correcta ? 'Correcto' : 'Incorrecto'));
         } else {
           writeToChatLog(data.message, 'text-info')
           // Scroll chat text area to the bottom on new input.

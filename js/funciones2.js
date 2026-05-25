@@ -1,12 +1,5 @@
-let quizResuelto = {}
-let respuestasUsuario = {}
-let channel;
-let soyControlador = false;
-let quizActivo = false;
-let currentRoom = null;
-let currentRole = null;
-let pendingRoomInfo = null;
-let roomReady = false;
+const quizResuelto = {}
+const respuestasUsuario = {}
 
 let hlsInstance = null;
 let dashInstance = null;
@@ -19,7 +12,6 @@ let currentPlayer = "hls";
 function iniciarEventos() {
     var canvas = document.getElementById('canvas');
     var video = document.getElementById('video');
-
 
     //Evento para actualizar la barra de progreso
     video.addEventListener("timeupdate", barraProgreso, true);
@@ -34,7 +26,6 @@ function iniciarEventos() {
             //calculate the current time based on position of mouse cursor in canvas box
             video.currentTime = video.duration * (e.offsetX / canvas.clientWidth);
 
-
         }
         catch (err) {
             // Fail silently but show in F12 developer tools console
@@ -43,39 +34,17 @@ function iniciarEventos() {
     }, true);
 }
 
-
 function play() {
-
-
-    if (!soyControlador) return;
-
-
-    const video = document.getElementById("video");
-
+    var video = document.getElementById("video");
+    var icono_play = document.getElementById("play");
     if (video.paused) {
-
-
         video.play();
-
-
-        channel.send(JSON.stringify({
-            type: "play"
-        }));
-
-
+        icono_play.setAttribute("class", "glyphicon glyphicon-pause");
     } else {
-
-
         video.pause();
-
-
-        channel.send(JSON.stringify({
-            type: "pause"
-        }));
+        icono_play.setAttribute("class", "glyphicon glyphicon-play");
     }
 }
-
-
 
 
 function stop() {
@@ -84,21 +53,17 @@ function stop() {
     video.currentTime = 0;
     video.pause();
     icono_play.setAttribute("class", "glyphicon glyphicon-play");
-
 }
-
 
 function forward(value) {
     var video = document.getElementById("video");
     video.currentTime += value;
 }
 
-
 function backward(value) {
     var video = document.getElementById("video");
     video.currentTime -= value;
 }
-
 
 function barraProgreso() {
     var video = document.getElementById('video');
@@ -117,10 +82,8 @@ function barraProgreso() {
     var aux = minutos + ':' + segundos;
     ct.innerHTML = aux;
 
-
     //Actualizamos la barra de progreso
     if (canvas.getContext) {
-
 
         var ctx = canvas.getContext("2d");
         //clear canvas before painting
@@ -131,18 +94,13 @@ function barraProgreso() {
             ctx.fillRect(0, 0, fWidth, canvas.clientHeight);
         }
 
-
     }
-
 
     var progreso = video.currentTime / video.duration
 
-
     const ruta = document.getElementById("camino")
 
-
     const total = ruta.getTotalLength()
-
 
     ruta.style.strokeDashoffset = total - (total * progreso)
 }
@@ -158,12 +116,11 @@ function fullScreen() {
 }
 window.addEventListener("DOMContentLoaded", iniciarEventos, false);
 
-
 //Listener para Text Track
-document.addEventListener("DOMContentLoaded", function () {  // don't run this until all DOM content is loaded
+document.addEventListener("DOMContentLoaded", function () {  // don't run this until all DOM content is loaded 
     var track = document.getElementById("track");
     track.addEventListener("cuechange", function () {
-        var myTrack = this.track;             // track element is "this"
+        var myTrack = this.track;             // track element is "this" 
         var myCues = myTrack.activeCues;      // activeCues is an array of current cues.                                                    
         if (myCues.length > 0) {
             var json = JSON.parse(myCues[0].text);
@@ -177,13 +134,8 @@ document.addEventListener("DOMContentLoaded", function () {  // don't run this u
     }, false);
 }, false);
 
-
 function setTime(tValue, zona) {
-    if (!soyControlador) return;
-
-
     const video = document.getElementById('video');
-
 
     function aplicarTiempo() {
         video.removeEventListener('canplaythrough', aplicarTiempo);
@@ -195,72 +147,48 @@ function setTime(tValue, zona) {
         }
     }
 
-
     if (video.readyState >= 4) { // HAVE_ENOUGH_DATA
         aplicarTiempo();
     } else {
         video.addEventListener('canplaythrough', aplicarTiempo);
     }
-
-
-    //Practica 3
-    channel.send(JSON.stringify({
-        type: "seek",
-        time: tValue,
-        zona: zona
-    }));
 }
-
 
 async function detectarMapa() {
 
-
     const mapa = document.getElementById("mapa")
-
 
     const res = await fetch("http://localhost:5000/detect", {
         method: "POST",
         body: await (await fetch(mapa.src)).blob()
     })
 
-
     const data = await res.json()
 
-
     moverMarcador(data)
-
 
 }
 function moverMarcador(detections) {
 
-
     const marker = document.getElementById("marker")
 
-
     detections.forEach(d => {
-
 
         if (d.label === "rivendell") {
             marker.style.left = d.x + "px"
             marker.style.top = d.y + "px"
         }
 
-
         if (d.label === "erebor") {
             marker.style.left = d.x + "px"
             marker.style.top = d.y + "px"
         }
 
-
     })
-
 
 }
 function moverZona(zona) {
-
-
     const marker = document.getElementById("marker")
-
 
     const posiciones = {
         comarca: { x: 220, y: 180 },
@@ -270,18 +198,16 @@ function moverZona(zona) {
         lago: { x: 415, y: 150 },
         erebor: { x: 415, y: 135 }
     }
-    console.log("posiciones", posiciones)
     marker.style.left = posiciones[zona].x + "px"
     marker.style.top = posiciones[zona].y + "px"
 
-
 }
 window.onload = () => {
+
     moverZona("comarca")
     iniciarRuta()
     actualizarRuta("comarca")
     marcarZonaActiva("comarca")
-
 
     const icono_play = document.getElementById("play");
     const video = document.getElementById("video");
@@ -291,15 +217,12 @@ window.onload = () => {
     marcarSeleccion("player", "hls");
     marcarSeleccion("quality", "high");
 
-    // Cargar reproductor HLS para que todos lo vean (controlador y espectador)
     loadHLS();
 }
-
 
 function iniciarRuta() {
     const ruta = document.getElementById("camino");
     const total = ruta.getTotalLength();
-
 
     ruta.style.strokeDasharray = total; // longitud total para animación
     ruta.style.strokeDashoffset = total; // empieza invisible
@@ -313,25 +236,19 @@ const progresoZona = {
     erebor: 1
 }
 
-
 function actualizarRuta(zona) {
-
-
     const ruta = document.getElementById("camino")
     const total = ruta.getTotalLength()
 
-
     const progreso = progresoZona[zona]
-
 
     ruta.style.strokeDashoffset = total - (total * progreso)
 
-
 }
-
 
 function toggleSubs() {
     const video = document.getElementById("video");
+
     for (let i = 0; i < video.textTracks.length; i++) {
         const track = video.textTracks[i];
         if (track.kind === "subtitles") {
@@ -340,8 +257,8 @@ function toggleSubs() {
     }
 }
 
-
 function changeQuality(level) {
+
     const video = document.getElementById("video");
 
     calidadActual = level;
@@ -440,10 +357,8 @@ function cargarSegmento(index) {
     };
 }
 
-
 function toggleSettings() {
     const menu = document.getElementById("settingsMenu");
-
 
     if (menu.style.display === "block") {
         menu.style.display = "none";
@@ -452,173 +367,23 @@ function toggleSettings() {
     }
 }
 
-
 function changeSpeed(speed) {
 
-
     const video = document.getElementById("video");
-
 
     video.playbackRate = speed;
 }
 
-
-async function onCommandSubmit() {
-    const input = document.getElementById("commandInput");
-    const status = document.getElementById("commandStatus");
-    const result = document.getElementById("commandResult");
-
-
-    if (!input) return;
-
-
-    const text = input.value.trim();
-    if (!text) {
-        status.textContent = "Escribe un comando primero.";
-        return;
-    }
-
-
-    status.textContent = "Analizando comando localmente...";
-    result.textContent = "";
-
-
-    try {
-        const intent = await classifyUserCommand(text);
-        result.innerHTML = `<b>Intención detectada:</b> ${intent.intent} <br><b>Confianza:</b> ${Math.round(intent.score * 100)}%`;
-        executeCommandIntent(intent.intent, text);
-
-
-        if (soyControlador && channel?.readyState === "open") {
-            sendCommandIntent(intent.intent, text);
-        }
-
-
-        status.textContent = "";
-    } catch (err) {
-        console.error(err);
-        status.textContent = "No se pudo analizar el comando localmente.";
-    }
-}
-
-
-async function classifyUserCommand(text) {
-    const labels = [
-        'play video',
-        'pause video',
-        'forward video',
-        'rewind video',
-        'seek video',
-        'toggle subtitles',
-        'change quality',
-        'change speed',
-        'show quiz'
-    ];
-
-
-    if (window.classifyCommand) {
-        try {
-            const response = await window.classifyCommand(text, labels);
-            if (response && response.labels && response.labels.length) {
-                return {
-                    intent: response.labels[0],
-                    score: response.scores ? response.scores[0] : 0
-                };
-            }
-        } catch (err) {
-            console.warn('Transformers classification failed, usando heurística:', err);
-        }
-    }
-
-
-    return simpleCommandClassifier(text);
-}
-
-
-function simpleCommandClassifier(text) {
-    const normalized = text.toLowerCase();
-
-
-    if (/(play|reproducir|continuar)/.test(normalized)) return { intent: 'play video', score: 0.85 };
-    if (/(pause|pausar|detener)/.test(normalized)) return { intent: 'pause video', score: 0.85 };
-    if (/(adelante|avanzar|forward|10 segundos)/.test(normalized)) return { intent: 'forward video', score: 0.8 };
-    if (/(atrás|rewind|retroceder|10 segundos)/.test(normalized)) return { intent: 'rewind video', score: 0.8 };
-    if (/(buscar|ir a|saltar a)/.test(normalized)) return { intent: 'seek video', score: 0.8 };
-    if (/(subtítulos|subtitulo|subtitles)/.test(normalized)) return { intent: 'toggle subtitles', score: 0.8 };
-    if (/(calidad|resolución|hd|4k)/.test(normalized)) return { intent: 'change quality', score: 0.75 };
-    if (/(velocidad|speed)/.test(normalized)) return { intent: 'change speed', score: 0.75 };
-    if (/(quiz|pregunta|prueba)/.test(normalized)) return { intent: 'show quiz', score: 0.75 };
-
-
-    return { intent: 'unknown', score: 0.5 };
-}
-
-
-function sendCommandIntent(intent, originalText) {
-    if (!channel || channel.readyState !== "open") return;
-
-
-    channel.send(JSON.stringify({
-        type: "command",
-        intent,
-        text: originalText
-    }));
-}
-
-
-function executeCommandIntent(intent, originalText) {
-    const video = document.getElementById("video");
-
-
-    switch (intent) {
-        case 'play video':
-            if (video) video.play();
-            break;
-        case 'pause video':
-            if (video) video.pause();
-            break;
-        case 'forward video':
-            forward(10);
-            break;
-        case 'rewind video':
-            backward(10);
-            break;
-        case 'seek video':
-            setTime(100, 'rivendell');
-            break;
-        case 'toggle subtitles':
-            toggleSubs();
-            break;
-        case 'change quality':
-            changeQuality('medium');
-            break;
-        case 'change speed':
-            changeSpeed(1.5);
-            break;
-        case 'show quiz':
-            if (typeof mostrarQuiz === 'function') mostrarQuiz('comarca');
-            break;
-        default:
-            console.log('Intención desconocida', originalText);
-            break;
-    }
-}
-
-
 document.addEventListener("click", function (e) {
-
 
     const menu = document.getElementById("settingsMenu");
     const btn = document.getElementById("settingsBtn");
-
 
     if (!menu.contains(e.target) && e.target !== btn) {
         menu.style.display = "none";
     }
 
-
 });
-
 
 document.addEventListener("DOMContentLoaded", () => {
     const video = document.getElementById("video");
@@ -626,7 +391,6 @@ document.addEventListener("DOMContentLoaded", () => {
         video.textTracks[0].mode = "showing";
     }
 });
-
 
 const zonasVideo = [
     { zona: "comarca", inicio: 0, fin: 99 },
@@ -637,114 +401,53 @@ const zonasVideo = [
     { zona: "erebor", inicio: 266, fin: 298 } // ajustar según duración real
 ];
 
-
 const video = document.getElementById("video");
-
 
 let zonaAnterior = null; // para no actualizar la misma zona repetidamente
 let quizMostrado = null
 
-
 video.addEventListener("timeupdate", () => {
-
-
-    if (!soyControlador) return; // 🔥 CLAVE
-
 
     const tiempo = video.currentTime
 
-
     const zonaActual = zonasVideo.find(z => tiempo >= z.inicio && tiempo < z.fin)
-
-
     if (zonaActual && zonaActual.zona !== zonaAnterior) {
-
 
         zonaAnterior = zonaActual.zona
 
-
         moverZona(zonaActual.zona)
         actualizarRuta(zonaActual.zona)
-        actualizarDetalleZona(zonaActual.zona);
         marcarZonaActiva(zonaActual.zona)
 
-
     }
-
 
     zonasVideo.forEach(z => {
 
-
-        if (tiempo >= z.fin && !quizResuelto[z.zona] && !quizActivo) {
-            quizActivo = true;
-
-
-            quizResuelto[z.zona] = true; // 🔥 bloquea reentrada INMEDIATA
-
+        if (tiempo >= z.fin && !quizResuelto[z.zona]) {
 
             video.pause()
 
-
-            setControllerStatus(`Alumno está respondiendo el quiz de ${z.zona}. Esperando respuesta...`, "#ffd700");
-
-            mostrarEsperaQuiz();
-
-
-            channel.send(JSON.stringify({
-                type: "quiz",
-                zona: z.zona
-            }));
-
-
-            // mostrarQuiz(z.zona)
-
+            mostrarQuiz(z.zona)
 
         }
 
-
     })
-
 
 })
 
-
-function mostrarEsperaQuiz() {
-
-
-    const overlay = document.getElementById("waitingOverlay");
-
-
-    if (overlay) {
-        overlay.style.display = "flex";
-    }
-}
-
-
-function ocultarEsperaQuiz() {
-
-
-    const overlay = document.getElementById("waitingOverlay");
-
-
-    if (overlay) {
-        overlay.style.display = "none";
-    }
-}
-
-
-function marcarZonaActiva(zona) {
+function marcarZonaActiva(zonaActual) {
     const items = document.querySelectorAll('.table-of-contents .list-group-item');
+
     items.forEach(item => {
-        // El atributo onclick contiene el nombre de la zona
-        const onClickAttr = item.getAttribute('onclick') || '';
-        if (onClickAttr.includes(`'${zona}'`)) {
+        // Usamos dataset en vez de onclick para evitar comparaciones frágiles
+        const zona = item.dataset.zona;
+        if (zona === zonaActual) {
             item.classList.add('active');
         } else {
             item.classList.remove('active');
         }
     });
 }
-
 
 const quizZonas = {
     comarca: [
@@ -782,32 +485,27 @@ const quizZonas = {
     ]
 };
 
-
 function mostrarQuiz(zona) {
     const preguntas = quizZonas[zona];
     if (!preguntas) return;
 
-
     // Seleccionamos aleatoriamente una pregunta
     const quiz = preguntas[Math.floor(Math.random() * preguntas.length)];
-
 
     const container = document.getElementById("quizContainer");
     const pregunta = document.getElementById("quizPregunta");
     const opciones = document.getElementById("quizOpciones");
     const mensaje = document.getElementById("quizMensaje");
-
+    const ultimaZona = zonasVideo[zonasVideo.length - 1].zona;
 
     pregunta.innerText = quiz.pregunta;
     opciones.innerHTML = "";
     mensaje.innerText = "";
 
-
     // Mezclar opciones
     const shuffledOpciones = quiz.opciones
         .map((op, i) => ({ op, i }))  // guardar índice original
         .sort(() => Math.random() - 0.5);
-
 
     shuffledOpciones.forEach((item, i) => {
         const btn = document.createElement("button");
@@ -822,14 +520,11 @@ function mostrarQuiz(zona) {
         btn.style.borderRadius = "6px";
         btn.style.width = "100%";
 
-
         btn.onmouseenter = () => btn.style.background = "rgba(255,215,0,0.15)";
         btn.onmouseleave = () => btn.style.background = "transparent";
 
-
         btn.onclick = () => {
             const esCorrecta = item.i === quiz.correcta;
-
 
             respuestasUsuario[zona] = {
                 pregunta: quiz.pregunta,
@@ -839,66 +534,42 @@ function mostrarQuiz(zona) {
             };
             quizResuelto[zona] = true;
             container.style.display = "none";
-
-
-            channel.send(JSON.stringify({
-                type: "respuestaQuiz",
-                correcta: esCorrecta,
-                zona: zona,
-                pregunta: quiz.pregunta,
-                respuestaUsuario: item.op,
-                respuestaCorrecta: quiz.opciones[quiz.correcta]
-            }));
+            // Si es la última zona, mostrar resumen
+            if (zona === ultimaZona) {
+                mostrarResumen();
+            } else {
+                video.play();
+            }
         };
-
 
         opciones.appendChild(btn);
     });
 
-
     container.style.display = "block";
 }
 
-
-// video.addEventListener("ended", function () {
-//     // Solo el controlador muestra el resumen cuando el video termina
-//     if (soyControlador) {
-//         mostrarResumen();
-//     }
-// })
-
-
 function mostrarResumen() {
-
 
     const panel = document.getElementById("resumenFinal")
     const resultado = document.getElementById("resultadoViaje")
     const detalle = document.getElementById("detallePreguntas")
 
-
     detalle.innerHTML = ""
-
 
     let aciertos = 0
     const total = Object.keys(respuestasUsuario).length
 
-
     Object.keys(respuestasUsuario).forEach(zona => {
-
 
         const r = respuestasUsuario[zona]
 
-
         if (r.correcta) aciertos++
 
-
         const bloque = document.createElement("div")
-
 
         bloque.style.marginBottom = "10px"
         bloque.style.padding = "5px"
         bloque.style.borderBottom = "1px solid #6e5a2c"
-
 
         bloque.innerHTML = `
         <b>${zona.toUpperCase()}</b><br>
@@ -908,113 +579,50 @@ function mostrarResumen() {
         ${r.correcta ? "✔ Correcto" : "❌ Incorrecto"}
         `
 
-
         detalle.appendChild(bloque)
 
-
     })
-
 
     resultado.innerHTML = `
         Has acertado <b>${aciertos}</b> de <b>${total}</b> preguntas
         `
 
-
     panel.style.display = "block"
-    panel.style.visibility = "visible"
-    panel.style.opacity = "1"
-
-
-    // Ocultar botón de reiniciar para el espectador
-    const restartBtn = document.querySelector("#resumenFinal button");
-    if (restartBtn) {
-        restartBtn.style.display = soyControlador ? "block" : "none";
-    }
-
-
-    // Propagar resumen al espectador (solo el controlador)
-    if (soyControlador && channel?.readyState === "open") {
-        console.log("📤 Controlador envia resumen-final al espectador");
-        channel.send(JSON.stringify({
-            type: "resumen",
-            respuestasUsuario: respuestasUsuario
-        }));
-    }
-
 
 }
-
 
 function reiniciarViaje() {
 
+    video.currentTime = 0
+    video.play()
 
-    ejecutarReinicio();
+    document.getElementById("resumenFinal").style.display = "none"
 
+    Object.keys(quizResuelto).forEach(k => delete quizResuelto[k])
+    Object.keys(respuestasUsuario).forEach(k => delete respuestasUsuario[k])
 
-    // SOLO controlador envía señal
-    if (soyControlador && channel?.readyState === "open") {
-
-
-        channel.send(JSON.stringify({
-            type: "reiniciar"
-        }));
-    }
 }
-
-
-function ejecutarReinicio() {
-
-
-    video.currentTime = 0;
-
-
-    video.play();
-
-
-    document.getElementById("resumenFinal").style.display = "none";
-
-
-    Object.keys(quizResuelto).forEach(k => delete quizResuelto[k]);
-    Object.keys(respuestasUsuario).forEach(k => delete respuestasUsuario[k]);
-
-
-    quizActivo = false;
-    zonaAnterior = null;
-
-
-    ocultarEsperaQuiz();
-
-    moverZona("comarca");
-    actualizarRuta("comarca");
-    marcarZonaActiva("comarca");
-}
-
 
 function cerrarSettings() {
     const loader = document.getElementById("settingsMenu");
     if (loader) loader.style.display = "none";
 }
 
-
 function mostrarLoader() {
     const loader = document.getElementById("videoLoader");
     if (loader) loader.style.display = "block";
 }
-
 
 function ocultarLoader() {
     const loader = document.getElementById("videoLoader");
     if (loader) loader.style.display = "none";
 }
 
-
 function accionSettings(callback) {
     cerrarSettings();
     mostrarLoader();
 
-
     const resultado = callback(); // ejecuta la acción
-
 
     // Si callback devuelve una promesa (como una carga de video), espera
     if (resultado instanceof Promise) {
@@ -1027,32 +635,12 @@ function accionSettings(callback) {
     }
 }
 
-
-// function actualizarDetalleZona(zona) {
-//     const infoZonas = {
-//         comarca: { nombre: "La Comarca", descripcion: "Hogar de Bilbo y los hobbits, tranquilo y verde.", img: "img/comarca.jpg" },
-//         rivendell: { nombre: "Rivendel", descripcion: "Valle élfico gobernado por Elrond, lugar de descanso y consejo.", img: "img/rivendell.jpg" },
-//         montanas: { nombre: "Montañas Nubladas", descripcion: "Terreno peligroso, hogar de trolls y orcos.", img: "img/montanas.jpg" },
-//         bosque: { nombre: "Bosque Negro", descripcion: "Bosque oscuro y tenebroso, con elfos hostiles.", img: "img/bosque.jpg" },
-//         lago: { nombre: "Ciudad del Lago", descripcion: "Ciudad a orillas del lago, gobernada por Bard.", img: "img/lago.jpg" },
-//         erebor: { nombre: "Erebor", descripcion: "Montaña solitaria, hogar del tesoro custodiado por Smaug.", img: "img/erebor.jpg" }
-//     };
-
-
-//     if (infoZonas[zona]) {
-//         document.getElementById("nombreZona").innerText = infoZonas[zona].nombre;
-//         document.getElementById("descripcionZona").innerText = infoZonas[zona].descripcion;
-//         document.getElementById("imgZona").src = infoZonas[zona].img;
-//     }
-// }
-
-
-// const img = document.getElementById("imgZona");
-// img.style.opacity = 0;
-// setTimeout(() => {
-//     img.src = infoZonas[zona].img;
-//     img.style.opacity = 1;
-// }, 200);
+const img = document.getElementById("imgZona");
+img.style.opacity = 0;
+setTimeout(() => {
+    img.src = infoZonas[zona].img;
+    img.style.opacity = 1;
+}, 200);
 
 function loadHLS() {
     const video = document.getElementById("video");
@@ -1067,7 +655,7 @@ function loadHLS() {
         hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
             hlsInstance.autoLevelEnabled = false;
             addSubtitles();
-            //video.play();
+            video.play();
         });
 
         currentPlayer = "hls";
@@ -1166,509 +754,3 @@ function selectPlayer(player) {
 
     marcarSeleccion("player", player);
 }
-
-
-// ===============================
-// PRACTICA 3 - SIGNALING WEBRTC
-// ===============================
-
-
-const socket = new WebSocket("ws://localhost:8080");
-
-
-const peerConnection = new RTCPeerConnection({
-
-
-    iceServers: [
-        {
-            urls: "stun:stun.l.google.com:19302"
-        }
-    ]
-});
-
-
-socket.onopen = () => {
-
-
-    console.log("WS conectado");
-
-
-    if (pendingRoomInfo) {
-        sendJoinRoom(pendingRoomInfo.room, pendingRoomInfo.role);
-        if (pendingRoomInfo.requestOffer) {
-            sendRequestOffer();
-        }
-        pendingRoomInfo = null;
-    }
-};
-
-
-function showMainApp() {
-    const mainApp = document.getElementById("mainApp");
-    if (mainApp) {
-        mainApp.style.display = "block";
-    }
-}
-
-
-function hideMainApp() {
-    const mainApp = document.getElementById("mainApp");
-    if (mainApp) {
-        mainApp.style.display = "none";
-    }
-}
-
-
-function sendJoinRoom(room, role) {
-    if (!room) return;
-    currentRoom = room;
-    currentRole = role;
-    socket.send(JSON.stringify({
-        type: "join-room",
-        room: currentRoom,
-        role: currentRole
-    }));
-    console.log(`Uniéndome a sala ${currentRoom} como ${currentRole}`);
-}
-
-
-function unirASala(role) {
-    const roomInput = document.getElementById("roomName");
-    const room = roomInput?.value?.trim();
-
-
-    if (!room) {
-        alert("Introduce un nombre de sala válido.");
-        roomInput?.focus();
-        return;
-    }
-
-
-    const esControlador = role === 'controlador';
-    const roleText = esControlador ? 'Controlador' : 'Espectador';
-    const requestOffer = !esControlador;
-
-
-    if (socket.readyState === WebSocket.OPEN) {
-        sendJoinRoom(room, role);
-        if (requestOffer) {
-            sendRequestOffer();
-        }
-    } else {
-        pendingRoomInfo = { room, role, requestOffer };
-    }
-
-
-    iniciarPeer(esControlador);
-
-
-    const roomInfo = document.getElementById("roomInfo");
-    console.log("roomInfo", roomInfo)
-    if (roomInfo) {
-        roomInfo.textContent = esControlador
-            ? `Sala: ${room} · Rol: ${roleText}. Esperando a un espectador...`
-            : `Sala: ${room} · Rol: ${roleText}. Esperando al controlador...`;
-    }
-
-
-    hideMainApp();
-
-
-    const roomPanel = document.getElementById("roomPanel");
-    if (roomPanel) {
-        roomPanel.style.display = "none";
-    }
-}
-
-
-socket.onmessage = async (event) => {
-
-
-    const data = JSON.parse(event.data);
-
-
-    console.log("📩 WS recibido:", data.type);
-
-
-    // RECIBIR OFFER
-    if (data.type === "offer") {
-
-
-        console.log("📥 Offer recibida");
-
-
-        await peerConnection.setRemoteDescription(
-            new RTCSessionDescription(data.offer)
-        );
-
-
-        const answer = await peerConnection.createAnswer();
-
-
-        await peerConnection.setLocalDescription(answer);
-
-
-        socket.send(JSON.stringify({
-            type: "answer",
-            answer: answer
-        }));
-
-
-        console.log("📤 Answer enviada");
-    }
-
-
-    // RECIBIR ANSWER
-    if (data.type === "answer") {
-
-
-        console.log("📥 Answer recibida");
-
-
-        await peerConnection.setRemoteDescription(
-            new RTCSessionDescription(data.answer)
-        );
-    }
-
-
-    // RECIBIR SOLICITUD DE OFERTA
-    if (data.type === "request-offer") {
-        console.log("📥 Solicitud de oferta recibida");
-        if (soyControlador) {
-            await crearOffer();
-        }
-    }
-
-
-    // SALA LISTA: hay controlador y espectador
-    if (data.type === "room-ready") {
-        console.log("📥 Sala lista para comenzar");
-        roomReady = true;
-        const roleText = soyControlador ? 'Controlador' : 'Espectador';
-        const roomInfo = document.getElementById("roomInfo");
-        if (roomInfo) {
-            roomInfo.textContent = `Sala: ${currentRoom} · Rol: ${roleText}. Sala lista.`;
-        }
-        showMainApp();
-
-
-        if (soyControlador) {
-            const commandPanel = document.getElementById("commandPanel");
-            if (commandPanel) {
-                commandPanel.style.display = "block";
-            }
-        }
-    }
-
-
-    // NUEVO PEER EN LA SALA
-    if (data.type === "peer-joined" || data.type === "peer-waiting") {
-        console.log("📥 Hay un peer en la sala:", data.type);
-        if (soyControlador) {
-            await crearOffer();
-        }
-    }
-
-
-    // RECIBIR ICE
-    if (data.type === "ice-candidate") {
-
-
-        console.log("📥 ICE recibido");
-
-
-        try {
-            await peerConnection.addIceCandidate(data.candidate);
-        } catch (err) {
-            console.error(err);
-        }
-    }
-};
-
-
-function sendRequestOffer() {
-    if (!currentRoom) return;
-    socket.send(JSON.stringify({
-        type: "request-offer",
-        room: currentRoom
-    }));
-    console.log("📤 Solicitud de oferta enviada");
-}
-
-
-async function crearOffer() {
-    if (!channel) {
-        channel = peerConnection.createDataChannel("canal");
-        configurarCanal();
-    }
-
-
-    console.log("🎬 Creando offer...");
-
-
-    const offer = await peerConnection.createOffer();
-    await peerConnection.setLocalDescription(offer);
-
-
-    socket.send(JSON.stringify({
-        type: "offer",
-        offer: offer
-    }));
-
-
-    console.log("📤 Offer enviada");
-}
-
-
-async function iniciarPeer(esOffer) {
-
-
-    soyControlador = esOffer; // Establecer el rol
-
-
-    // ENVIAR ICE
-    peerConnection.onicecandidate = (event) => {
-
-
-        if (event.candidate) {
-
-
-            socket.send(JSON.stringify({
-                type: "ice-candidate",
-                candidate: event.candidate
-            }));
-
-
-            console.log("📤 ICE enviado");
-        }
-    };
-
-
-    if (esOffer) {
-        await crearOffer();
-    }
-}
-
-
-peerConnection.ondatachannel = (event) => {
-
-
-    console.log("📥 DataChannel recibido");
-
-
-    channel = event.channel;
-
-
-    configurarCanal();
-};
-
-
-function configurarCanal() {
-    if (!soyControlador) {
-        bloquearControles();
-    }
-
-
-    // Mostrar mensaje de rol
-    console.log("Soy controlador?", soyControlador);
-    document.getElementById("controllerView").style.display = soyControlador ? "block" : "none";
-    document.getElementById("viewerView").style.display = soyControlador ? "none" : "block";
-
-
-    const videoControls = document.getElementById("bloque");
-    const settingsMenu = document.getElementById("settingsMenu");
-    if (videoControls) {
-        videoControls.style.display = soyControlador ? "block" : "none";
-    }
-    if (!soyControlador && settingsMenu) {
-        settingsMenu.style.display = "none";
-    }
-
-
-    channel.onopen = () => {
-        console.log("✅ Canal abierto");
-    };
-
-
-    channel.onmessage = (event) => {
-
-
-        console.log("📩 Mensaje P2P:", event.data);
-
-
-        const data = JSON.parse(event.data);
-
-
-        // comandos
-        if (data.type === "play") {
-            video.play();
-        }
-
-
-        if (data.type === "pause") {
-            video.pause();
-        }
-
-
-        if (data.type === "seek") {
-
-
-            video.currentTime = data.time;
-
-
-            moverZona(data.zona);
-            actualizarRuta(data.zona);
-            marcarZonaActiva(data.zona);
-        }
-        if (data.type === "quiz") {
-
-
-            video.pause();
-
-
-            mostrarQuiz(data.zona);
-        }
-        if (data.type === "command") {
-            console.log("📩 Comando recibido:", data.intent, data.text);
-            executeCommandIntent(data.intent, data.text);
-        }
-        if (data.type === "respuestaQuiz") {
-            quizActivo = false;
-            ocultarEsperaQuiz();
-            respuestasUsuario[data.zona] = {
-                pregunta: data.pregunta,
-                respuestaUsuario: data.respuestaUsuario,
-                respuestaCorrecta: data.respuestaCorrecta,
-                correcta: data.correcta
-            };
-
-
-            console.log("Alumno respondió");
-            const respuestaTexto = data.correcta ? "correctamente" : "incorrectamente";
-            setControllerStatus(`El alumno ha respondido ${respuestaTexto} al quiz de ${data.zona}.`, data.correcta ? "#8bc34a" : "#f44336");
-            //document.getElementById("controllerQuizResult").textContent = `Resultado: ${data.correcta ? "Correcto" : "Incorrecto"}`;
-
-            // No reanudar automáticamente; el controlador decidirá cuándo darle play.
-            const ultimaZona = zonasVideo[zonasVideo.length - 1].zona;
-            if (data.zona === ultimaZona) {
-                setTimeout(() => {
-                    mostrarResumen();
-                }, 200);
-            } else {
-                video.play();
-
-                channel.send(JSON.stringify({
-                    type: "play"
-                }));
-            }
-        }
-        if (data.type === "resumen") {
-            // Espectador recibe el resumen
-            console.log("📩 Espectador recibe resumen-final:", data.respuestasUsuario);
-            respuestasUsuario = data.respuestasUsuario;
-
-
-            // Asegurar que el panel se muestre
-            const panel = document.getElementById("resumenFinal");
-            if (panel) {
-                mostrarResumen();
-            } else {
-                console.error("Panel resumenFinal no encontrado en el DOM");
-            }
-        }
-        if (data.type === "reiniciar") {
-
-
-            console.log("📩 Reinicio recibido");
-
-
-            ejecutarReinicio();
-        }
-    };
-
-
-    channel.onclose = () => {
-        console.log("❌ Canal cerrado");
-    };
-}
-
-
-function setControllerStatus(message, color = "#ffd700") {
-    const status = document.getElementById("controllerStatus");
-    const result = document.getElementById("controllerQuizResult");
-    if (status) {
-        status.textContent = message;
-        status.style.color = color;
-    }
-    if (result && color === "#ffd700") {
-        result.textContent = "";
-    }
-}
-
-
-function playTest() {
-
-
-    var video = document.getElementById("video");
-
-
-    if (video.paused) {
-
-
-        video.play();
-
-
-        if (channel?.readyState === "open") {
-
-
-            channel.send(JSON.stringify({
-                type: "play"
-            }));
-        }
-
-
-    } else {
-
-
-        video.pause();
-
-
-        if (channel?.readyState === "open") {
-
-
-            channel.send(JSON.stringify({
-                type: "pause"
-            }));
-        }
-    }
-}
-
-
-//ROLES
-function bloquearControles() {
-
-
-    document.getElementById("play").style.pointerEvents = "none";
-    document.getElementById("stop").style.pointerEvents = "none";
-    document.getElementById("forward").style.pointerEvents = "none";
-    document.getElementById("backward").style.pointerEvents = "none";
-    document.getElementById("canvas").style.pointerEvents = "none";
-
-
-    const tablaZonas = document.querySelector(".table-of-contents");
-
-
-    if (tablaZonas) {
-        tablaZonas.style.pointerEvents = "none";
-        tablaZonas.style.opacity = "0.6";
-    }
-    console.log("🔒 Controles bloqueados");
-}
-
-
-// Event listener for Enter key on commandInput
-document.getElementById('commandInput').addEventListener('keydown', function (event) {
-    if (event.key === 'Enter') {
-        onCommandSubmit();
-    }
-});

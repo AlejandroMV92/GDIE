@@ -1,2 +1,13 @@
+*-.DS_Store
+*.log
+*.tmp
 *.zip
 *.ogg
+*.ts
+*.mp4
+*.avi
+*.exe
+*.dll
+*.so
+*.dylib
+*.m4s
