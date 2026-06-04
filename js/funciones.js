@@ -1173,7 +1173,9 @@ function selectPlayer(player) {
 // ===============================
 
 
-const socket = new WebSocket("ws://localhost:8080");
+const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+const host = window.location.host;
+const socket = new WebSocket(`${protocol}://${host}/ws`);
 
 
 const peerConnection = new RTCPeerConnection({
